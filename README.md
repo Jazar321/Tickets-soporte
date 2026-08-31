@@ -4,6 +4,36 @@ CRUD de escritorio (Tkinter) para gestionar tickets de soporte, con base de dato
 **compartida** en Supabase (PostgreSQL gratuito) para que todo el equipo del
 bootcamp trabaje contra los mismos datos.
 
+## Estructura del proyecto
+
+```
+├── main.py                       Punto de entrada: login → app principal
+├── crear_admin.py                Script de un solo uso: crea la primera cuenta admin
+├── schema.sql                    Tablas de la base de datos
+│
+├── core/                         Configuración y conexión a la base de datos
+│   ├── config.py                 Lee las credenciales desde .env
+│   └── conexion.py                get_connection() — usado por todos los repositorios
+│
+├── repositorios/                 Capa de acceso a datos (una tabla por archivo)
+│   ├── usuarios.py                Login, alta/baja de soporte y admin
+│   ├── tickets.py                 CRUD de tickets, folio automático, asignación
+│   └── mensajes.py                Hilo de seguimiento de cada ticket
+│
+└── gui/                           Interfaz Tkinter
+    ├── estilos.py                 Paleta oscura y catálogos (categorías, estados, etc.)
+    ├── login.py                   Ventana de inicio de sesión
+    ├── dialogo_nuevo_ticket.py    Ventana emergente para crear un ticket
+    ├── tab_tickets.py             Pestaña de tickets (lista + detalle + seguimiento)
+    ├── tab_usuarios.py            Pestaña de usuarios (solo admin)
+    └── app.py                     Ventana principal, arma las pestañas según el rol
+```
+
+La `gui/` solo llama a los `repositorios/`, nunca ejecuta SQL directamente —
+así si mañana cambian de PostgreSQL a otra base, solo se toca `core/` y
+`repositorios/`, sin tocar ninguna pantalla.
+
+
 ## 1. Crear la base de datos compartida (solo una persona lo hace)
 
 1. Ir a https://supabase.com → crear cuenta gratis → "New Project".
@@ -14,9 +44,9 @@ bootcamp trabaje contra los mismos datos.
    - Port (usar el **6543**, el del *pooler*, para que soporte varias conexiones simultáneas del equipo)
    - Database name
    - User
-5. Compartir con el equipo: host, puerto, usuario y la contraseña del proyecto (por un medio privado, no lo subas a GitHub).
+5. Compartir con el equipo: host, puerto, usuario y la contraseña del proyecto .
 
-## 2. Cada integrante del equipo (en su propia laptop)
+## 2. Cada integrante del equipo 
 
 ```bash
 git clone <url-del-repo>
@@ -27,8 +57,6 @@ venv\Scripts\activate      # Windows
 
 pip install -r requirements.txt
 
-copy .env.example .env     # Windows
-# cp .env.example .env      # Mac/Linux
 ```
 
 Editar `.env` y poner las credenciales que les compartieron:
@@ -70,12 +98,3 @@ quién hizo qué y cuándo.
 
 Todos verán y editarán los mismos tickets en tiempo real (al refrescar la lista).
 
-## Notas
-
-- El archivo `.env` **nunca** se sube a GitHub (ya está en `.gitignore`); cada quien
-  tiene el suyo local con las mismas credenciales.
-- El tier gratuito de Supabase da 500 MB de base de datos, más que suficiente para
-  un proyecto de bootcamp.
-- Si en unos meses el proyecto pausa el uso por 7+ días, Supabase pausa el proyecto
-  gratuito automáticamente; basta con reactivarlo desde el dashboard cuando lo necesiten de nuevo.
-# Tickets-soporte

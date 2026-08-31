@@ -49,7 +49,7 @@ así si mañana cambian de PostgreSQL a otra base, solo se toca `core/` y
 ## 2. Cada integrante del equipo 
 
 ```bash
-git clone <url-del-repo>
+git clone https://github.com/Jazar321/Tickets-soporte
 cd ticket_crud
 python -m venv venv
 venv\Scripts\activate      # Windows

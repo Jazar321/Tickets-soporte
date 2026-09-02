@@ -46,11 +46,13 @@ class TabTickets(ttk.Frame):
         else:
             self.solo_mios = None
 
-        columnas = ("numero", "nombre", "categoria", "prioridad", "estado", "asignado")
+        columnas = ("numero", "nombre", "categoria", "prioridad", "estado", "asignado", "emitido", "resuelto")
         self.tree = ttk.Treeview(izquierda, columns=columnas, show="headings", selectmode="browse", height=25)
         titulos = {"numero": "Folio", "nombre": "Solicitante", "categoria": "Categoría",
-                   "prioridad": "Prioridad", "estado": "Estado", "asignado": "Asignado a"}
-        anchos = {"numero": 100, "nombre": 130, "categoria": 90, "prioridad": 70, "estado": 90, "asignado": 110}
+                   "prioridad": "Prioridad", "estado": "Estado", "asignado": "Asignado a",
+                   "emitido": "Emitido", "resuelto": "Resuelto"}
+        anchos = {"numero": 100, "nombre": 130, "categoria": 90, "prioridad": 70, "estado": 90, "asignado": 110,
+                  "emitido": 110, "resuelto": 110}
         for col in columnas:
             self.tree.heading(col, text=titulos[col])
             self.tree.column(col, width=anchos[col], anchor="w")
@@ -86,9 +88,12 @@ class TabTickets(ttk.Frame):
             messagebox.showerror("Error de conexión", str(e))
             return
         for t in tickets:
+            fecha_creacion = t["fecha_creacion"].strftime("%Y-%m-%d %H:%M") if t["fecha_creacion"] else "-"
+            fecha_resolucion = t["fecha_resolucion"].strftime("%Y-%m-%d %H:%M") if t["fecha_resolucion"] else "-"
             self.tree.insert("", "end", iid=t["id"], values=(
                 t["numero_seguimiento"], t["nombre_usuario"], t["categoria"],
-                t["prioridad"], t["estado"], t["asignado_nombre"] or "Sin asignar"
+                t["prioridad"], t["estado"], t["asignado_nombre"] or "Sin asignar",
+                fecha_creacion, fecha_resolucion
             ))
 
     def refrescar_soporte(self):
@@ -116,11 +121,15 @@ class TabTickets(ttk.Frame):
 
         info = ttk.Frame(p, style="Panel.TFrame")
         info.pack(fill="x", padx=15)
+        fecha_creacion = t["fecha_creacion"].strftime("%Y-%m-%d %H:%M") if t["fecha_creacion"] else "-"
+        fecha_resolucion = t["fecha_resolucion"].strftime("%Y-%m-%d %H:%M") if t["fecha_resolucion"] else "Aún no resuelto"
         datos_ro = [
             ("Solicitante", t["nombre_usuario"]),
             ("Correo", t["correo_electronico"] or "-"),
             ("Teléfono/Ext.", t["telefono_extension"] or "-"),
             ("Departamento", t["departamento_area"] or "-"),
+            ("Emitido", fecha_creacion),
+            ("Resuelto", fecha_resolucion),
         ]
         for i, (label, valor) in enumerate(datos_ro):
             ttk.Label(info, text=f"{label}:", style="Panel.TLabel").grid(row=i, column=0, sticky="w", pady=1)

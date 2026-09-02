@@ -84,13 +84,20 @@ def obtener_ticket(ticket_id: int) -> dict:
 def actualizar_ticket(ticket_id: int, datos: dict) -> None:
     set_clause = ", ".join([f"{c} = %s" for c in CAMPOS_TICKET])
     valores = [datos.get(c, "") for c in CAMPOS_TICKET]
-    valores.append(ticket_id)
 
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                f"UPDATE tickets SET {set_clause}, fecha_actualizacion = NOW() WHERE id = %s",
-                valores,
+                f"""
+                UPDATE tickets SET {set_clause},
+                    fecha_actualizacion = NOW(),
+                    fecha_resolucion = CASE
+                        WHEN %s IN ('Resuelto', 'Cerrado') THEN COALESCE(fecha_resolucion, NOW())
+                        ELSE NULL
+                    END
+                WHERE id = %s
+                """,
+                valores + [datos.get("estado", ""), ticket_id],
             )
         conn.commit()
 
@@ -131,3 +138,4 @@ def historial_asignaciones(ticket_id: int) -> list:
                 (ticket_id,),
             )
             return cur.fetchall()
+
